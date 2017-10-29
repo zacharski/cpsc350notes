@@ -62,3 +62,27 @@ After the `AS` clause which is in parentheses, we have a statement that uses thi
 
 This is way cool because our node code can do this with only one call to the postgresql server.
 
+## split and regular expressions to the rescue.
+
+Now suppose we have those interests lumped together as one argument in the body of a post request:
+
+key. | value
+:---: | :---: 
+interests | 'long walks in woods,  classical music,      romantic candlelight dinners,            puppies'
+
+
+And on the node side we would like to split that long string into an array of separate values. We can do this using the javascript split command which can take a regular expression as an argument:
+
+	> interests = 'long walks in woods,  classical music,      romantic candlelight dinners,            puppies'
+     'long walks in woods,  classical music,      romantic candlelight dinners,            puppies'
+    >interest_list = interests.split(/\,[\s]+/)
+    [ 'long walks in woods',
+      'classical music',
+      'romantic candlelight dinners',
+      'puppies' ]
+    > 
+
+
+So we split the list on a comma followed by zero or more spaces.
+
+  
