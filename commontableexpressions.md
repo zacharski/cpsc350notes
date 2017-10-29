@@ -85,4 +85,58 @@ And on the node side we would like to split that long string into an array of se
 
 So we split the list on a comma followed by zero or more spaces.
 
-  
+## SQL Injection
+
+So we have a list that looks like:
+
+	[ 'long walks in woods',  'classical music', 'romantic candlelight dinners', 'puppies' ]
+	
+and we want to convert that to a series of insert statements:
+
+    	((select id from inserted), 'long walks in woods' ), 
+       	((select id from inserted), 'classical music'),
+       	((select id from inserted), 'romantic candlelight dinners');
+       	((select id from inserted), 'puppies');
+and we might be tempted to use a map to accomplish this:
+
+
+	let u = interest_list.map(function( inte) {
+    	return ('((select id from inserted), \'' + inte  + '\')')
+	    }).join();
+	
+unfortunately, this leads us susceptible to SQL injection. 
+
+A correct approach would be something like this:
+
+
+
+	  app.post('/addclient', async (req, res) => {
+	    console.log(req.body);
+	      
+	      let name = req.body.name;
+	      let city = req.body.city;
+	      let state = req.body.state;
+	      let interests = req.body.interests;
+		  // First let's generate all the inserts into the interests table
+		  let interest_list = interests.split(/\,[\s]+/)
+		  let i = 4;
+		  let interest_inserts = interest_list.map(function( inte) {
+		     return ('((select id from inserted), $' + i++  + ')')
+		  }).join();
+	      // now let's combine that with the main insert:
+
+		  let query = 'WITH inserted AS ( INSERT INTO clients (name, city, state)\n';
+		  query +=    '  VALUES ($1, $2, $3) RETURNING id )\n';
+	      query +=    'INSERT INTO interests VALUES ' + interest_inserts
+	      // now that we have a complete query string, let's execute it:
+	      try {
+	        const response = await pool.query(query, [name, city, state].concat(interest_list));
+	        res.json({status: 'client added'});
+	            }
+	      catch(err){
+	        console.error("Error running query " + err);
+	           }
+	  });
+
+	
+Here we are missing some error checking but the function works!
