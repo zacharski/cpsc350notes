@@ -140,3 +140,73 @@ A correct approach would be something like this:
 
 	
 Here we are missing some error checking but the function works!
+
+
+# Another use for Common Expression Tables.
+Suppose we have a table called `people`:
+
+	core=# select * from people;
+	 id | firstname | lastname |    hometown     |     status      
+	----+-----------+----------+-----------------+-----------------
+	  1 | Ann       | Mulkern  | Fargo, ND       | on vacation
+	  3 | Ben       | Mansk    | Mesilla, NM     | on site working
+	  4 | Clara     | Wieck    | Albuquerque, NM | on vacation
+	  5 | Fiona     | Helborn  | Albuquerque, NM | on vacation
+	  6 | Rachel    | Young    | Austin, TX      | working
+	  7 | Dan       | Vanner   | Austin, TX      | working
+	  8 | Liz       | Phillips | Austin, TX      | traveling to job site
+	(7 rows)
+
+and a table called `friends` indicating who is friends with whom
+
+
+	core=# select * from friends;
+	 person | friends_with 
+	--------+--------------
+	      1 |            4
+	      1 |            5
+	      1 |            6
+	      3 |            7
+	      4 |            5
+	      4 |            1
+	      5 |            1
+	      1 |            8
+	      4 |            8
+	      5 |            8
+	(10 rows)
+
+and suppose we want to retrieve the information about people ordered by the number of friends they have.
+
+To get a person's friend count we can do a simple select statement:
+
+
+	core=# SELECT person, COUNT(friends_with) FROM friends GROUP BY person;
+	 person | count 
+	--------+-------
+	      4 |     3
+	      1 |     4
+	      5 |     2
+	      3 |     1
+	(4 rows)
+Now we are going to use that select in a WITH query to get our results:
+
+
+	with friend_count AS (
+	   SELECT person, COUNT(friends_with) FROM friends GROUP BY person
+		)
+	select people.firstname, people.lastname, people.hometown, friend_count.count friends 
+	    from friend_count join people on people.id = friend_count.person order by friends desc;
+
+which gives us the result we wanted:
+
+      result:
+ 	 firstname | lastname |    hometown     | friends 
+ 	-----------+----------+-----------------+---------
+	 Ann       | Mulkern  | Fargo, ND       |       4
+	 Clara     | Wieck    | Albuquerque, NM |       3
+	 Fiona     | Helborn  | Albuquerque, NM |       2
+	 Ben       | Mansk    | Mesilla, NM     |       1
+	 (4 rows)
+
+
+So Ann has the most friends (4) and is listed first.
