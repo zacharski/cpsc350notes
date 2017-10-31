@@ -46,13 +46,11 @@ Piñon | Elementary School| SFPS| Santa Fe  |NM | B+
 
 Here no single column is a unique identifier. Schools can have the same name. Different districts can have the same abbreviations and there can be multiple school districts in a city. Suppose we determine that the combination school, district, city, and state make each row unique and we can use them as a composite primary key.
 
-Now imagine another table in the database which contains information about students including what school they are attending. If we went with the composite key we mentioned above for the school table, each row in the student table would also have columns for `school`, `district`, and `'city`.
+Now imagine another table in the database which contains information about students including what school they are attending. If we went with the composite key we mentioned above for the school table, each row in the student table would also have columns for `school`, `district`, and `'city`. 
 
 
- 
-
-firstname | lastname | dob |  ... | school | district | city 
-:---: |  :---: | :---: |  :---: |  :---: |  :---: |  :---: |  :---: 
+firstname | lastname | dob |  ...  | school | district | city 
+:---: |  :---: | :---: |  :---: |  :---: |  :---: |  :---:  
 Mary | Harris | 2008-06-11 | .. |Doña Ana   | LCPS | Las Cruces
 Andy | Quinn | 2008-03-07 | .. |Doña Ana   | LCPS | Las Cruces
 Jane | Grider | 2008-07-12 | .. |Doña Ana   | LCPS | Las Cruces
